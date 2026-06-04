@@ -1,0 +1,42 @@
+#dms-launcher {
+  position: fixed;
+  width: 72px;
+  height: 72px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  cursor: grab;
+  z-index: 999999;
+  overflow: visible;
+  box-shadow: none;
+  transition:
+    transform 120ms ease,
+    filter 120ms ease,
+    opacity 120ms ease;
+}
+
+#dms-launcher img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+#dms-launcher:hover {
+  transform: scale(1.07);
+  filter: brightness(1.12);
+}
+
+#dms-launcher:active,
+#dms-launcher.dms-dragging {
+  cursor: grabbing;
+  transform: scale(1.02);
+}
+
+#dms-launcher.dms-drag-disabled {
+  cursor: pointer;
+  opacity: 0.9;
+}

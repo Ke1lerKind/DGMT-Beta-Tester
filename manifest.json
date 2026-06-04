@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "Drumgod Modtool",
+  "version": "0.5.0",
+  "description": "WIP Twitch moderation support dashboard for chat analysis, local mod notes, stream activities and moderation workflows.",
+  "action": {
+    "default_title": "Drumgod Modtool",
+    "default_icon": {
+      "16": "bilder/Browserlogo.png",
+      "32": "bilder/Browserlogo.png",
+      "48": "bilder/Browserlogo.png",
+      "128": "bilder/Browserlogo.png"
+    }
+  },
+  "icons": {
+    "16": "bilder/Browserlogo.png",
+    "32": "bilder/Browserlogo.png",
+    "48": "bilder/Browserlogo.png",
+    "128": "bilder/Browserlogo.png"
+  },
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://www.twitch.tv/*"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.twitch.tv/*"
+      ],
+      "js": [
+        "src/analysis.js",
+        "src/content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "bilder/Browserlogo.png"
+      ],
+      "matches": [
+        "https://www.twitch.tv/*"
+      ]
+    }
+  ]
+}

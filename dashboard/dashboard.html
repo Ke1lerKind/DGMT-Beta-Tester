@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Drumgod Modtool</title>
+
+  <link rel="icon" type="image/png" href="../bilder/Browserlogo.png" />
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+
+<body>
+  <div class="dashboard">
+    <header class="dashboard-header">
+      <img id="dashboard-logo" src="../bilder/Browserlogo.png" alt="Drumgod Modtool" />
+
+      <div class="dashboard-header-text">
+        <h1>Drumgod Modtool</h1>
+        <p data-i18n="subtitle">Chat chaos, but make it draggable.</p>
+      </div>
+    </header>
+
+    <nav class="tab-bar">
+      <button class="tab-button active" data-tab="dashboard" data-i18n="dashboardTab">Dashboard</button>
+      <button class="tab-button" data-tab="stream" data-i18n="streamTab">Stream Info</button>
+      <button id="stream-activities-tab-button" class="tab-button hidden" data-tab="activities" data-i18n="activitiesTab">
+        Stream Activities
+      </button>
+      <button class="tab-button" data-tab="settings" data-i18n="settingsTab">Settings</button>
+    </nav>
+
+    <section id="tab-dashboard" class="tab-content active">
+      <section class="quick-status compact-status">
+        <div class="quick-status-item">
+          <span class="quick-label" data-i18n="activeChatTitle">Active Chat</span>
+          <span id="active-chat">No Twitch chat detected.</span>
+        </div>
+
+        <div class="quick-status-item">
+          <span class="quick-label" data-i18n="statusTitle">Status</span>
+          <span id="dashboard-status">Ready. Waiting for chat data.</span>
+        </div>
+      </section>
+
+      <main class="dashboard-grid">
+        <section id="raid-dashboard-panel" class="panel panel-wide" data-mod-view-only data-collapse-key="raid-dashboard">
+          <div class="panel-title-row">
+            <h2 data-i18n="raidDashboardTitle">Raid</h2>
+            <span class="api-wip-badge" data-i18n="apiWipBadge">WIP · API required</span>
+          </div>
+
+          <div class="collapsible-content">
+            <div class="raid-dashboard-grid">
+              <label>
+                <span data-i18n="raidChannelLabel">Raid channel</span>
+                <input id="dashboard-raid-channel" type="text" placeholder="channel" />
+              </label>
+
+              <label>
+                <span data-i18n="raidTextCommandLabel">Raid text command</span>
+                <input id="raid-text-command-template" type="text" value="!raid" />
+              </label>
+            </div>
+
+            <div class="command-preview">
+              <span data-i18n="commandPreview">Command Preview</span>
+              <code id="dashboard-raid-command-output">/raid channel</code>
+            </div>
+
+            <div class="raid-action-row">
+              <button class="small-button activity-copy" data-activity-command="dashboard-raid" data-i18n="copyRaidCommand">
+                Copy /raid
+              </button>
+
+              <button class="small-button activity-send-real" data-activity-command="dashboard-raid">
+                Send /raid
+              </button>
+
+              <button class="small-button activity-copy" data-activity-command="raid-text" data-i18n="copyRaidTextCommand">
+                Copy !raid
+              </button>
+
+              <button class="small-button activity-send-real" data-activity-command="raid-text">
+                Send !raid
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-large panel-wide" data-collapse-key="live-chat">
+          <div class="panel-title-row">
+            <h2 data-i18n="liveChatTitle">Live Chat Data</h2>
+            <span id="message-count">0</span>
+          </div>
+
+          <div class="collapsible-content">
+            <div id="chat-feed" class="chat-feed">
+              <div class="empty-state" data-i18n="noMessages">No chat data detected yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-collapse-key="filtered-chat">
+          <div class="panel-title-row">
+            <h2 data-i18n="filteredChatTitle">Filtered Chat</h2>
+          </div>
+
+          <div class="collapsible-content">
+            <div id="filtered-feed" class="chat-feed">
+              <div class="empty-state" data-i18n="noFilteredMessages">No flagged messages yet.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-collapse-key="selected-message">
+          <div class="panel-title-row">
+            <h2 data-i18n="selectedMessageTitle">Selected Message</h2>
+          </div>
+
+          <div class="collapsible-content">
+            <div id="selected-message-empty" class="placeholder-box">
+              <p data-i18n="selectedMessageEmpty">Select a chat message to moderate that exact message.</p>
+            </div>
+
+            <div id="selected-message-content" class="selected-message-box hidden">
+              <div class="selected-message-meta">
+                <div>
+                  <span class="quick-label" data-i18n="selectedUserLabel">Selected User</span>
+                  <strong id="selected-message-user">-</strong>
+                </div>
+
+                <button id="clear-selected-message" class="small-button secondary" data-i18n="clearSelection">
+                  Clear
+                </button>
+              </div>
+
+              <div class="selected-message-preview">
+                <span class="quick-label" data-i18n="messageLabel">Message</span>
+                <p id="selected-message-text">-</p>
+              </div>
+
+              <div class="selected-message-actions">
+                <button id="copy-selected-message" class="small-button" data-i18n="copySelectedMessage">
+                  Copy selected message
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="dashboard-chatlog-panel" class="panel" data-mod-view-only data-collapse-key="dashboard-chatlog">
+          <div class="panel-title-row">
+            <h2 data-i18n="chatLogTitle">Chatlog</h2>
+            <span id="chat-log-count" class="mini-badge">0</span>
+          </div>
+
+          <div class="collapsible-content">
+            <div class="chatlog-main-box">
+              <div class="chatlog-status-grid">
+                <div class="quick-status-item">
+                  <span class="quick-label" data-i18n="chatLogCurrentChannel">Current channel</span>
+                  <span id="chat-log-current-channel">-</span>
+                </div>
+
+                <div class="quick-status-item">
+                  <span class="quick-label" data-i18n="chatLogRecordState">Recording</span>
+                  <span id="chat-log-record-state">-</span>
+                </div>
+              </div>
+
+              <p class="muted" data-i18n="chatLogDescription">
+                Stores detected chat locally and exports it as a text file.
+              </p>
+
+              <div class="chatlog-action-row">
+                <button id="export-chat-log" class="small-button" data-i18n="exportChatLog">
+                  Export chat log
+                </button>
+
+                <button id="clear-chat-log" class="small-button secondary" data-i18n="clearChatLog">
+                  Clear chat log
+                </button>
+              </div>
+
+              <div class="chatlog-preview-box">
+                <div class="panel-title-row">
+                  <h3 data-i18n="chatLogPreviewTitle">Live log preview</h3>
+                </div>
+
+                <div id="chat-log-preview" class="chatlog-preview">
+                  <div class="empty-state" data-i18n="chatLogPreviewEmpty">
+                    No logged messages yet.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="automod-queue-panel" class="panel automod-queue-panel hidden" data-mod-view-only data-collapse-key="automod-queue">
+          <div class="panel-title-row">
+            <h2 data-i18n="automodQueueTitle">AutoMod Queue</h2>
+            <span id="automod-queue-count" class="mini-badge">0</span>
+          </div>
+
+          <div class="collapsible-content">
+            <div id="automod-queue-empty" class="placeholder-box">
+              <p data-i18n="automodQueueEmpty">No flagged messages in queue.</p>
+            </div>
+
+            <div id="automod-queue-content" class="automod-queue-content hidden">
+              <div class="automod-queue-meta">
+                <div>
+                  <span class="quick-label" data-i18n="automodQueuePosition">Queue Position</span>
+                  <strong id="automod-queue-position">0 / 0</strong>
+                </div>
+
+                <div>
+                  <span class="quick-label" data-i18n="automodQueueScore">Score</span>
+                  <strong id="automod-queue-score">0</strong>
+                </div>
+              </div>
+
+              <div class="automod-queue-message">
+                <span class="quick-label" data-i18n="selectedUserLabel">Selected User</span>
+                <strong id="automod-queue-user">-</strong>
+
+                <span class="quick-label" data-i18n="messageLabel">Message</span>
+                <p id="automod-queue-message-text">-</p>
+
+                <span class="quick-label" data-i18n="userFlagsTitle">Detected Flags</span>
+                <div id="automod-queue-flags" class="analysis-flags"></div>
+              </div>
+
+              <div class="automod-queue-controls">
+                <button id="automod-queue-prev" class="small-button secondary" data-i18n="queuePrevious">
+                  Previous
+                </button>
+
+                <button id="automod-queue-next" class="small-button secondary" data-i18n="queueNext">
+                  Next
+                </button>
+
+                <button id="automod-queue-select" class="small-button" data-i18n="selectQueuedMessage">
+                  Select message
+                </button>
+              </div>
+
+              <div class="automod-queue-actions">
+                <button id="automod-queue-approve" class="action-button success api-wip-action" data-action="automod-approve" data-i18n="automodApprove">
+                  Approve
+                </button>
+
+                <button id="automod-queue-deny" class="action-button danger api-wip-action" data-action="automod-deny" data-i18n="automodDeny">
+                  Deny
+                </button>
+              </div>
+
+              <p class="api-wip-note" data-i18n="automodQueueWipNote">
+                WIP · AutoMod approve/deny requires Twitch API. The queue already helps you jump through flagged messages.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" data-collapse-key="user-analysis">
+          <div class="panel-title-row">
+            <h2 data-i18n="userAnalysisTitle">User Analysis</h2>
+          </div>
+
+          <div class="collapsible-content">
+            <div id="user-analysis-empty" class="placeholder-box">
+              <p data-i18n="userAnalysisDescription">Select a user to view local stats.</p>
+              <p class="muted" data-i18n="userAnalysisMuted">
+                Recent messages, flags, history and statistics.
+              </p>
+            </div>
+
+            <div id="user-analysis-content" class="user-analysis hidden">
+              <div class="user-analysis-header">
+                <div>
+                  <span class="quick-label" data-i18n="selectedUserLabel">Selected User</span>
+                  <strong id="selected-username">-</strong>
+                </div>
+              </div>
+
+              <div class="user-stats-grid">
+                <div class="user-stat-card">
+                  <span data-i18n="userMessages">Messages</span>
+                  <strong id="user-message-count">0</strong>
+                </div>
+
+                <div class="user-stat-card">
+                  <span data-i18n="userFlagged">Flagged</span>
+                  <strong id="user-flagged-count">0</strong>
+                </div>
+
+                <div class="user-stat-card">
+                  <span data-i18n="userHighestScore">Highest Score</span>
+                  <strong id="user-highest-score">0</strong>
+                </div>
+
+                <div class="user-stat-card">
+                  <span data-i18n="userAverageScore">Average Score</span>
+                  <strong id="user-average-score">0</strong>
+                </div>
+              </div>
+
+              <div class="user-section">
+                <h3 data-i18n="userFlagsTitle">Detected Flags</h3>
+                <div id="user-flags" class="analysis-flags">
+                  <span class="analysis-flag" data-i18n="noFlags">No flags</span>
+                </div>
+              </div>
+
+              <div class="user-section" data-mod-view-only>
+                <h3 data-i18n="userNotesTitle">Local Moderator Note</h3>
+                <textarea id="user-note-input" placeholder="Local note for this user"></textarea>
+                <button id="save-user-note" class="small-button" data-i18n="saveNote">
+                  Save note
+                </button>
+              </div>
+
+              <div class="user-section">
+                <h3 data-i18n="userRecentMessagesTitle">Recent Messages</h3>
+                <div id="user-recent-messages" class="chat-feed mini-feed"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel panel-wide" data-collapse-key="moderation-actions">
+          <div class="panel-title-row">
+            <h2 data-i18n="actionsTitle">Moderation Actions</h2>
+          </div>
+
+          <div class="collapsible-content">
+            <div id="action-empty" class="placeholder-box">
+              <p data-i18n="selectMessageForActions">
+                Select a message to prepare moderation actions.
+              </p>
+            </div>
+
+            <div id="action-content" class="moderation-actions hidden">
+              <div class="selected-action-user">
+                <div>
+                  <span class="quick-label" data-i18n="selectedUserLabel">Selected User</span>
+                  <strong id="action-selected-username">-</strong>
+                </div>
+
+                <div>
+                  <span class="quick-label" data-i18n="selectedMessageShort">Selected Message</span>
+                  <strong id="action-selected-message-state">-</strong>
+                </div>
+              </div>
+
+              <div class="tool-grid">
+                <div class="tool-card" data-mod-view-only>
+                  <h3 data-i18n="actionsTitle">Moderation Actions</h3>
+
+                  <div class="action-grid">
+                    <button id="action-ban" class="action-button danger api-wip-action" data-action="ban" data-i18n="ban">
+                      Ban
+                    </button>
+
+                    <button id="action-delete" class="action-button neutral api-wip-action" data-action="delete" data-i18n="deleteSelectedMessage">
+                      Delete message
+                    </button>
+
+                    <button id="action-report" class="action-button neutral api-wip-action" data-action="report" data-i18n="report">
+                      Report
+                    </button>
+
+                    <button id="action-pin" class="action-button success api-wip-action" data-action="pin" data-i18n="pinSelectedMessage">
+                      Pin message
+                    </button>
+
+                    <button id="action-warn" class="action-button warning" data-action="warn" data-i18n="warn">
+                      Warn
+                    </button>
+                  </div>
+
+                  <p class="api-wip-note" data-i18n="apiWipNote">
+                    WIP · Twitch API required for direct actions.
+                  </p>
+                </div>
+
+                <div class="tool-card automod-box" data-mod-view-only>
+                  <div class="panel-title-row">
+                    <h3 data-i18n="automodTitle">AutoMod</h3>
+                    <span class="api-wip-badge" data-i18n="apiWipBadge">WIP · API required</span>
+                  </div>
+
+                  <p class="muted" data-i18n="automodDescription">
+                    Flagged messages are automatically added to the AutoMod queue.
+                  </p>
+
+                  <div class="automod-row">
+                    <button id="automod-approve" class="action-button success api-wip-action" data-action="automod-approve" data-i18n="automodApprove">
+                      Approve
+                    </button>
+
+                    <button id="automod-deny" class="action-button danger api-wip-action" data-action="automod-deny" data-i18n="automodDeny">
+                      Deny
+                    </button>
+                  </div>
+                </div>
+
+                <div class="tool-card shoutout-box" data-mod-view-only>
+                  <h3 data-i18n="shoutoutTitle">Shoutout</h3>
+
+                  <input id="shoutout-username" type="text" placeholder="username" />
+
+                  <div class="shoutout-row">
+                    <button id="copy-shoutout-command" class="small-button" data-i18n="copyShoutout">
+                      Copy shoutout
+                    </button>
+
+                    <button id="use-selected-user-shoutout" class="small-button secondary api-wip-action" data-i18n="shoutoutSelectedUser">
+                      Shoutout selected user
+                    </button>
+                  </div>
+                </div>
+
+                <div class="tool-card timeout-box tool-card-wide" data-mod-view-only>
+                  <div class="panel-title-row">
+                    <h3 data-i18n="timeoutBuilderTitle">Timeout Builder</h3>
+                  </div>
+
+                  <div class="timeout-command-type-box">
+                    <label for="timeout-command-type" data-i18n="timeoutCommandType">Command type</label>
+                    <select id="timeout-command-type">
+                      <option value="timeout" data-i18n="timeoutCommandOption">Timeout</option>
+                      <option value="untimeout" data-i18n="untimeoutCommandOption">Untimeout</option>
+                      <option value="unban" data-i18n="unbanCommandOption">Unban</option>
+                    </select>
+                  </div>
+
+                  <div id="timeout-duration-section">
+                    <div class="preset-row">
+                      <button class="preset-button" data-timeout-add="10">+10s</button>
+                      <button class="preset-button" data-timeout-add="60">+1m</button>
+                      <button class="preset-button" data-timeout-add="600">+10m</button>
+                      <button class="preset-button" data-timeout-add="3600">+1h</button>
+                      <button class="preset-button" data-timeout-add="86400">+1d</button>
+                      <button class="preset-button" data-timeout-add="604800">+1w</button>
+                    </div>
+
+                    <div class="time-builder-grid">
+                      <label>
+                        <span data-i18n="weeks">Weeks</span>
+                        <input id="timeout-weeks" type="number" min="0" max="2" value="0" />
+                      </label>
+
+                      <label>
+                        <span data-i18n="days">Days</span>
+                        <input id="timeout-days" type="number" min="0" max="14" value="0" />
+                      </label>
+
+                      <label>
+                        <span data-i18n="hours">Hours</span>
+                        <input id="timeout-hours" type="number" min="0" max="336" value="0" />
+                      </label>
+
+                      <label>
+                        <span data-i18n="minutes">Minutes</span>
+                        <input id="timeout-minutes" type="number" min="0" max="20160" value="10" />
+                      </label>
+
+                      <label>
+                        <span data-i18n="seconds">Seconds</span>
+                        <input id="timeout-seconds" type="number" min="0" max="1209600" value="0" />
+                      </label>
+
+                      <label>
+                        <span data-i18n="timeoutTotal">Total</span>
+                        <input id="timeout-total" type="text" value="600s" disabled />
+                      </label>
+                    </div>
+
+                    <p class="api-wip-note" data-i18n="timeoutMaxNote">
+                      Twitch allows a maximum timeout duration of 14 days.
+                    </p>
+                  </div>
+
+                  <div id="timeout-reason-section" class="reason-box timeout-reason-box">
+                    <label for="action-reason" data-i18n="reasonLabel">Reason / note</label>
+
+                    <div class="reason-preset-row">
+                      <button class="reason-preset-button" data-reason="Spam" data-i18n="reasonSpam">Spam</button>
+                      <button class="reason-preset-button" data-reason="Harassment" data-i18n="reasonHarassment">Harassment</button>
+                      <button class="reason-preset-button" data-reason="Hate / Extremism" data-i18n="reasonExtremism">Hate / Extremism</button>
+                      <button class="reason-preset-button" data-reason="Self-promo" data-i18n="reasonSelfPromo">Self-promo</button>
+                      <button class="reason-preset-button" data-reason="Spoiler" data-i18n="reasonSpoiler">Spoiler</button>
+                      <button class="reason-preset-button" data-reason="Backseat gaming" data-i18n="reasonBackseat">Backseat</button>
+                    </div>
+
+                    <input id="action-reason" type="text" placeholder="Optional reason" />
+                  </div>
+
+                  <div class="command-preview">
+                    <span data-i18n="commandPreview">Command Preview</span>
+                    <code id="command-preview-output">/timeout username 600</code>
+                  </div>
+
+                  <div class="timeout-action-row">
+                    <button id="copy-timeout-command" class="small-button" data-i18n="copyTimeoutCommand">
+                      Copy command
+                    </button>
+
+                    <button id="send-timeout-action" class="small-button secondary api-wip-action" data-i18n="sendTimeout">
+                      Send command
+                    </button>
+                  </div>
+
+                  <p class="api-wip-note" data-i18n="sendTimeoutWipNote">
+                    WIP · Direct moderation action requires Twitch API. For now this prepares/copies the command.
+                  </p>
+                </div>
+
+                <div class="tool-card action-log-box tool-card-wide">
+                  <div class="panel-title-row">
+                    <h3 data-i18n="actionLogTitle">Action Log</h3>
+                    <button id="clear-action-log" class="small-button secondary" data-i18n="clearLog">
+                      Clear log
+                    </button>
+                  </div>
+
+                  <div id="action-log" class="action-log">
+                    <div class="empty-state" data-i18n="noActionsYet">No actions prepared yet.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </section>
+
+    <section id="tab-stream" class="tab-content">
+      <section class="panel" data-collapse-key="stream-info">
+        <div class="panel-title-row">
+          <h2 data-i18n="streamInfoTitle">Stream Info</h2>
+          <span class="api-wip-badge" data-i18n="apiWipBadge">WIP · API required</span>
+        </div>
+
+        <div class="collapsible-content">
+          <div class="stream-info-box">
+            <label data-i18n="streamTitleLabel">Title</label>
+            <input id="stream-title-input" type="text" disabled />
+
+            <label data-i18n="streamGameLabel">Game / Category</label>
+            <input id="stream-game-input" type="text" disabled />
+
+            <label data-i18n="streamTogetherLabel">Streaming Together</label>
+            <input id="stream-together-input" type="text" disabled />
+
+            <div class="stream-info-field" data-mod-view-only>
+              <label data-i18n="adStatusLabel">Ad Status</label>
+              <input id="stream-ad-input" type="text" disabled />
+            </div>
+
+            <div class="stream-action-row" data-mod-view-only>
+              <button id="postpone-ad-button" class="small-button secondary api-wip-action" disabled data-i18n="postponeAd">
+                Postpone ad
+              </button>
+
+              <button class="small-button api-wip-action" disabled data-i18n="saveStreamInfo">
+                Save changes
+              </button>
+            </div>
+
+            <p class="muted" data-mod-view-only data-i18n="streamEditNote">
+              Editing and ad controls will come later with Twitch API connection.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" data-mod-view-only data-collapse-key="stream-activity-settings">
+        <div class="panel-title-row">
+          <h2 data-i18n="streamActivitySettingsTitle">Stream Activity Tools</h2>
+        </div>
+
+        <div class="collapsible-content">
+          <p class="muted" data-i18n="streamActivitySettingsDescription">
+            Choose which activity tools should appear in the Stream Activities tab.
+          </p>
+
+          <div class="multi-select-box">
+            <label data-i18n="streamActivitySelectLabel">Enabled activities</label>
+
+            <div id="stream-activity-dropdown" class="custom-multiselect">
+              <button id="stream-activity-dropdown-toggle" type="button" class="custom-multiselect-toggle">
+                Aktivitäten auswählen
+              </button>
+
+              <div id="stream-activity-dropdown-menu" class="custom-multiselect-menu hidden">
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="flipcoin" data-stream-activity-option />
+                  <span>Flipcoin</span>
+                </label>
+
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="8ball" data-stream-activity-option />
+                  <span>8ball</span>
+                </label>
+
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="dice" data-stream-activity-option />
+                  <span>Dice</span>
+                </label>
+
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="giveaway" data-stream-activity-option />
+                  <span>Giveaway / Raffle</span>
+                </label>
+
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="queue" data-stream-activity-option />
+                  <span>Queue</span>
+                </label>
+
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="quote" data-stream-activity-option />
+                  <span>Quote</span>
+                </label>
+
+                <label class="custom-multiselect-option">
+                  <input type="checkbox" value="songrequest" data-stream-activity-option />
+                  <span>Songrequest</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="stream-activity-button-row">
+            <button id="save-stream-activities" class="small-button" data-i18n="saveStreamActivities">
+              Save activity selection
+            </button>
+
+            <button id="clear-stream-activities" class="small-button secondary" data-i18n="clearSelection">
+              Clear
+            </button>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="tab-activities" class="tab-content">
+      <section class="panel panel-wide" data-mod-view-only data-collapse-key="stream-activities">
+        <div class="panel-title-row">
+          <h2 data-i18n="activitiesTab">Stream Activities</h2>
+          <span class="api-wip-badge" data-i18n="apiWipBadge">WIP · API required</span>
+        </div>
+
+        <div class="collapsible-content">
+          <div id="stream-activities-empty" class="placeholder-box">
+            <p data-i18n="streamActivitiesEmpty">
+              Select activities under Stream Info to show tools here.
+            </p>
+          </div>
+
+          <div id="stream-activities-grid" class="activities-grid">
+            <div class="activity-card hidden" data-activity-card="flipcoin">
+              <h3>Flipcoin</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="flipcoin-command-template" type="text" value="!flipcoin" />
+              </label>
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="flipcoin-command-output">!flipcoin</code>
+              </div>
+
+              <div class="activity-action-row">
+                <button class="small-button activity-copy" data-activity-command="flipcoin" data-i18n="copyCommand">
+                  Copy command
+                </button>
+
+                <button class="small-button secondary api-wip-action activity-send" data-activity-command="flipcoin" data-i18n="sendCommand">
+                  Send command
+                </button>
+              </div>
+            </div>
+
+            <div class="activity-card hidden" data-activity-card="8ball">
+              <h3>8ball</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="eightball-command-template" type="text" value="!8ball {question}" />
+              </label>
+
+              <label data-i18n="questionLabel">Question</label>
+              <input id="eightball-question" type="text" placeholder="Question" />
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="eightball-command-output">!8ball</code>
+              </div>
+
+              <div class="activity-action-row">
+                <button class="small-button activity-copy" data-activity-command="8ball" data-i18n="copyCommand">
+                  Copy command
+                </button>
+
+                <button class="small-button secondary api-wip-action activity-send" data-activity-command="8ball" data-i18n="sendCommand">
+                  Send command
+                </button>
+              </div>
+            </div>
+
+            <div class="activity-card hidden" data-activity-card="dice">
+              <h3>Dice</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="dice-command-template" type="text" value="!dice {amount}d{sides}" />
+              </label>
+
+              <div class="activity-mini-grid">
+                <label>
+                  <span data-i18n="diceAmountLabel">Amount</span>
+                  <input id="dice-amount" type="number" min="1" max="20" value="1" />
+                </label>
+
+                <label>
+                  <span data-i18n="diceSidesLabel">Sides</span>
+                  <input id="dice-sides" type="number" min="2" max="1000" value="6" />
+                </label>
+              </div>
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="dice-command-output">!dice 1d6</code>
+              </div>
+
+              <div class="activity-action-row">
+                <button class="small-button activity-copy" data-activity-command="dice" data-i18n="copyCommand">
+                  Copy command
+                </button>
+
+                <button class="small-button secondary api-wip-action activity-send" data-activity-command="dice" data-i18n="sendCommand">
+                  Send command
+                </button>
+              </div>
+            </div>
+
+            <div class="activity-card hidden" data-activity-card="giveaway">
+              <h3>Giveaway / Raffle</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="giveaway-command-template" type="text" value="!raffle {keyword} {minutes}m {winners}" />
+              </label>
+
+              <div class="activity-mini-grid">
+                <label>
+                  <span data-i18n="keywordLabel">Keyword</span>
+                  <input id="giveaway-keyword" type="text" value="!join" />
+                </label>
+
+                <label>
+                  <span data-i18n="minutes">Minutes</span>
+                  <input id="giveaway-duration-minutes" type="number" min="1" max="180" value="10" />
+                </label>
+
+                <label>
+                  <span data-i18n="winnerCountLabel">Winners</span>
+                  <input id="giveaway-winners" type="number" min="1" value="1" />
+                </label>
+              </div>
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="giveaway-command-output">!raffle !join 10m 1</code>
+              </div>
+
+              <div class="activity-action-row">
+                <button class="small-button activity-copy" data-activity-command="giveaway" data-i18n="copyCommand">
+                  Copy command
+                </button>
+
+                <button class="small-button secondary api-wip-action activity-send" data-activity-command="giveaway" data-i18n="sendCommand">
+                  Send command
+                </button>
+              </div>
+            </div>
+
+            <div class="activity-card hidden" data-activity-card="queue">
+              <h3>Queue</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="queue-command-template" type="text" value="!queue {action}" />
+              </label>
+
+              <select id="queue-action">
+                <option value="open">Open</option>
+                <option value="close">Close</option>
+                <option value="next">Next</option>
+              </select>
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="queue-command-output">!queue open</code>
+              </div>
+
+              <button class="small-button activity-copy" data-activity-command="queue" data-i18n="copyCommand">
+                Copy command
+              </button>
+            </div>
+
+            <div class="activity-card hidden" data-activity-card="quote">
+              <h3>Quote</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="quote-command-template" type="text" value="!quote" />
+              </label>
+
+              <select id="quote-action">
+                <option value="show">Show quote</option>
+                <option value="add">Add quote</option>
+              </select>
+
+              <input id="quote-text" type="text" placeholder="Quote text" />
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="quote-command-output">!quote</code>
+              </div>
+
+              <button class="small-button activity-copy" data-activity-command="quote" data-i18n="copyCommand">
+                Copy command
+              </button>
+            </div>
+
+            <div class="activity-card hidden" data-activity-card="songrequest">
+              <h3>Songrequest</h3>
+
+              <label>
+                <span data-i18n="commandTemplateLabel">Command template</span>
+                <input id="songrequest-command-template" type="text" value="!songrequest {action}" />
+              </label>
+
+              <select id="songrequest-action">
+                <option value="open">Open</option>
+                <option value="close">Close</option>
+                <option value="skip">Skip</option>
+                <option value="song">Current song</option>
+              </select>
+
+              <div class="command-preview">
+                <span data-i18n="commandPreview">Command Preview</span>
+                <code id="songrequest-command-output">!songrequest open</code>
+              </div>
+
+              <button class="small-button activity-copy" data-activity-command="songrequest" data-i18n="copyCommand">
+                Copy command
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="tab-settings" class="tab-content">
+      <section class="panel" data-collapse-key="settings">
+        <div class="panel-title-row">
+          <h2 data-i18n="settingsTitle">Settings</h2>
+        </div>
+
+        <div class="collapsible-content settings-grid">
+          <div class="settings-list">
+            <div class="settings-row">
+              <div>
+                <strong data-i18n="languageLabel">Language</strong>
+                <p data-i18n="languageDescription">Choose the dashboard language.</p>
+              </div>
+
+              <select id="language-select">
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+              </select>
+            </div>
+
+            <div class="settings-row" data-mod-view-only>
+              <div>
+                <strong data-i18n="contentModeTitle">Content Mode</strong>
+                <p data-i18n="contentModeDescription">Choose how strict the message analysis should be.</p>
+              </div>
+
+              <select id="content-mode-select">
+                <option value="safe" data-i18n="safeMode">18- / Family Safe</option>
+                <option value="mature" data-i18n="matureMode">18+ / Mature Stream</option>
+              </select>
+            </div>
+
+            <div class="settings-row">
+              <div>
+                <strong data-i18n="dragLabel">Logo dragging</strong>
+                <p data-i18n="dragDescription">Allow the floating logo to be moved.</p>
+              </div>
+
+              <label class="checkbox-label">
+                <input id="drag-checkbox" type="checkbox" />
+                <span data-i18n="dragCheckbox">Enable dragging</span>
+              </label>
+            </div>
+
+            <div class="settings-row">
+              <div>
+                <strong data-i18n="logoVisibleTitle">Floating logo</strong>
+                <p data-i18n="logoVisibleDescription">
+                  Hide the floating logo and open the tool from the pinned extension icon instead.
+                </p>
+              </div>
+
+              <label class="checkbox-label">
+                <input id="logo-visible-checkbox" type="checkbox" />
+                <span data-i18n="logoVisibleCheckbox">Show floating logo</span>
+              </label>
+            </div>
+
+            <button id="reset-position-button" class="small-button" data-i18n="resetPosition">
+              Reset position
+            </button>
+          </div>
+
+          <div class="settings-list" data-mod-view-only>
+            <div class="settings-row">
+              <div>
+                <strong data-i18n="chatLogEnabledTitle">Save stream chat locally</strong>
+                <p data-i18n="chatLogEnabledDescription">
+                  Stores detected messages locally in the browser until you export or clear them.
+                </p>
+              </div>
+
+              <label class="checkbox-label">
+                <input id="chat-log-enabled" type="checkbox" />
+                <span data-i18n="chatLogEnabledCheckbox">Enable chat log</span>
+              </label>
+            </div>
+
+            <div class="settings-row">
+              <div>
+                <strong data-i18n="chatLogModeTitle">Chat log mode</strong>
+                <p data-i18n="chatLogModeDescription">
+                  Choose whether the log stores all messages or only flagged content.
+                </p>
+              </div>
+
+              <select id="chat-log-mode">
+                <option value="all" data-i18n="chatLogModeAll">Full chat</option>
+                <option value="flagged" data-i18n="chatLogModeFlagged">Only flagged content</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-list">
+            <div class="settings-row settings-row-stack">
+              <div>
+                <strong data-i18n="appearanceTitle">Appearance</strong>
+                <p data-i18n="appearanceDescription">Upload a custom background and choose a custom accent color.</p>
+              </div>
+
+              <label class="file-label">
+                <span data-i18n="customBackgroundLabel">Custom background</span>
+                <input id="custom-background-input" type="file" accept="image/png,image/jpeg,image/webp" />
+              </label>
+
+              <div class="color-row">
+                <label for="accent-color-input" data-i18n="accentColorLabel">Accent color</label>
+                <input id="accent-color-input" type="color" value="#9147ff" />
+              </div>
+
+              <div class="color-row">
+                <label for="secondary-color-input" data-i18n="secondaryColorLabel">Second color</label>
+                <input id="secondary-color-input" type="color" value="#bf94ff" />
+              </div>
+
+              <label class="checkbox-label gradient-checkbox-row">
+                <input id="gradient-enabled-checkbox" type="checkbox" />
+                <span data-i18n="gradientEnabledLabel">Use color gradient</span>
+              </label>
+			  
+			  <div class="color-row">
+  <label for="gradient-angle-input">Farbverlauf Winkel</label>
+  <input id="gradient-angle-input" type="range" min="0" max="360" value="135" />
+</div>
+
+<div class="color-row">
+  <label for="gradient-style-select">Farbverlauf Typ</label>
+  <select id="gradient-style-select">
+    <option value="linear">Linear</option>
+    <option value="radial">Radial</option>
+  </select>
+</div>
+
+              <div class="custom-list-actions">
+                <button id="save-appearance" class="small-button" data-i18n="saveAppearance">Save appearance</button>
+                <button id="reset-appearance" class="small-button secondary" data-i18n="resetAppearance">Reset appearance</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-list settings-wide" data-mod-view-only>
+            <section class="panel inner-panel" data-collapse-key="custom-word-lists">
+              <div class="panel-title-row">
+                <h2 data-i18n="customWordListsTitle">Custom Word Lists</h2>
+              </div>
+
+              <div class="collapsible-content">
+                <p class="muted" data-i18n="customWordListsDescription">
+                  Add one word or phrase per line. Whitelist prevents flags. Blacklist forces a flag.
+                </p>
+
+                <div class="custom-list-mode-row">
+                  <label for="custom-list-mode-select" data-i18n="customListModeLabel">Edit lists for</label>
+                  <select id="custom-list-mode-select">
+                    <option value="safe" data-i18n="safeMode">18- / Family Safe</option>
+                    <option value="mature" data-i18n="matureMode">18+ / Mature Stream</option>
+                  </select>
+                </div>
+
+                <div class="custom-list-grid">
+                  <div class="custom-list-box">
+                    <label id="custom-whitelist-label" for="custom-whitelist" data-i18n="whitelistLabel">Whitelist</label>
+                    <textarea id="custom-whitelist" placeholder="word or phrase per line"></textarea>
+                  </div>
+
+                  <div class="custom-list-box">
+                    <label id="custom-blacklist-label" for="custom-blacklist" data-i18n="blacklistLabel">Blacklist</label>
+                    <textarea id="custom-blacklist" placeholder="word or phrase per line"></textarea>
+                  </div>
+                </div>
+
+                <div class="custom-list-actions">
+                  <button id="save-custom-lists" class="small-button" data-i18n="saveCustomLists">
+                    Save word lists
+                  </button>
+
+                  <button id="clear-custom-lists" class="small-button secondary" data-i18n="clearCustomLists">
+                    Clear current lists
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <footer class="credits">
+      Provided by twitch.tv/truedrumgod
+    </footer>
+  </div>
+
+  <script src="../src/analysis.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
